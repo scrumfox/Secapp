@@ -30,7 +30,7 @@ Ensure that the transfer of the sensitive data is intended and that it does not 
 invalid curve attack
 
 # Hash collision attacks.
-The library keystore files uses a HMAC hash that is only 16 bits long, allowing a malicious user to retrieve the password used for keystore integrity verification checks. This vulnerability only affects users of the `BKS-V1` keystore format
+The library keystore files uses a HMAC hash that is only 16 bits long, allowing a malicious user to retrieve the password used for keystore integrity verification checks. This vulnerability only affects users of the `deee` keystore format
 Padding oracle attack
 Open redirector attack that can leak an authorization code. A malicious user or attacker can craft a request to the authorization endpoint using the authorization code grant type, and specify a manipulated redirection URI via the redirect_uri parameter. This can cause the authorization server to redirect the resource owner user-agent to a URI under the control of the attacker with the leaked authorization code
 
