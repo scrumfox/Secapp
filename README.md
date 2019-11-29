@@ -70,3 +70,78 @@ This call to java.io.File.!operator_javanewinit() contains a path manipulation f
 # Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)
 This call to jQuery() contains a cross-site scripting (XSS) flaw. The application populates the HTTP response with untrusted input, allowing an attacker to embed malicious content, such as Javascript code, which will be executed in the context of the victim's browser. XSS vulnerabilities are commonly exploited to steal or manipulate cookies, modify presentation of content, and compromise confidential information, with new attack vectors being discovered on a regular basis.
 Use contextual escaping on all untrusted data before using it to construct any portion of an HTTP response. The escaping method should be chosen based on the specific use case of the untrusted data, otherwise it may not protect fully against the attack. For example, if the data is being written to the body of an HTML page, use HTML entity escaping; if the data is being written to an attribute, use attribute escaping; etc. Both the OWASP Java Encoder library and the Microsoft AntiXSS library provide contextual escaping methods. For more details on contextual escaping, see https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md. In addition, as a best practice, always validate untrusted input to ensure that it conforms to the expected format, using centralized data validation routines when possible.
+# Session fixation and multiple concurrent sessions:
+
+These will be fixed in the same way. The latest forms auth 'AU' cookie issued will be tied to the user's account by storing the last login datetime in the AU cookie encrypted section, and also against the user's account.
+
+The two times will be compared when authenticating the forms auth cookie, and if different the user will be redirected to the login page with an error message saying 'You have been logged out because you have logged in to your account elsewhere.'
+
+Old AU cookies will therefore be unusable past the point of authentication only (when advancing past either username page or mem word page).
+
+Steps to repro (session fixation)
+
+    Login using username and password
+    Take a copy of the AU cookie
+    Enter correct mem word chars and continue to next page
+    Edit cookie value (e.g. in firebug) and set old AU cookie value
+
+Steps to repro (single session)
+
+    Login using username and password
+    Open another browser and login using same username and password
+    Refresh the page on the first browser
+
+Mitigation:
+ The user's current authentication state - saved in an encrypted cookie, so size is important
+ filters.Add(new SingleSessionFilter());
+        }
+
+# ForgotPasswordOtp brute force:
+
+It is found that it was possible to brute force the security code of the forgot password page. Theu did not successfully bruteforce the security code, as the e-mail was not working and without this we had little idea of the format of the security code. They attempted bruteforcing the code by entering numbers 1 to 10000 using an automated attack tool.
+
+Resolution should be to kick the user out of the forgot password process after a configurable number of attempts to enter the security code (default = 3)
+
+MItigation:
+Added the ForgotPasswordOtpAttempts": "3" to configurable
+Added new session state to keep forgotpasswordoptAttempts: ForgotPasswordSessionState
+Remove the exsting session:
+Get the existing FP Sesssion
+check the otpattmepts with the configuraiton set item, if it >= 
+remove the exisitng session.
+Flaw Id Name Proposed Resolution Notes
+4 Cross-Site Request Forgery (CSRF) Fix Use the built in MVC 4 Html.AntiForgeryToken on all form pages
+  [AllowAnonymous, ValidateAntiForgeryToken]
+        public ActionResult LogOn(LogOnModel model, string returnUrl)
+		
+7 Unmasked Sensitive Data Defer/discuss with Jim This is by design, however we have an outstanding user story to send the reset password by e-mail instead of display on screen
+5 Auto-Complete Enabled Fix Easy fix!
+3 Security Feature Brute Force Fix Log out helpdesk user and lock account as recommended
+2 Security Feature Bypass Fix Instead of randomising the user id values, keep the userid held in session instead of using it on the page
+1 Clickjacking Protection Mechanism Failure Fix Easy fix! Was already in place on IDP.
+8 SECURE cookie flag not set Fix Easy fix! Was already in place on IDP.
+10 SSL RC4 Cipher Suites Supported Defer Already discussed with GTS, a change will impact all customers - with KS to investigate
+9 Verbose HTTP Response Headers Fix Easy fix! Was already in place on IDP.
+6 Concurrent Login Discuss Annoying fix, but possible. The IDP now disallows concurrent logins.
+
+Changes made:
+
+4. AntiXSS protection when encoding html - this was a global configuration change. I'm not sure how you would be able to test this one.
+3. User logged out of helpdesk when failing to answer user security questions multiple times
+2. UserID not passed between pages in helpdesk using from variables any more. Now stored in session.
+1. Add a HTTP header to helpdesk see pdf for details
+8. Set the secure flag on all helpdesk cookies
+9. Removed server header etc. see pdf for details
+
+Mitigation to do on Modfied Web.Conf:
+	<httpCookies httpOnlyCookies="true" requireSSL="true" />
+  <httpRuntime targetFramework="4.5" enableVersionHeader="false" relaxedUrlToFileSystemMapping="true" encoderType="System.Web.Security.AntiXss.AntiXssEncoder, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=xxx" />
+	
+	<forms loginUrl="~/XXXXX/LogOn" timeout="2880" + requireSSL="true" name="au" />
+	
+	- <customErrors mode="On" /> // Remove
+	+ <customErrors mode="RemoteOnly" />
+	
+	+ <add name="X-Frame-Options" value="Deny" /.
+  
+  
