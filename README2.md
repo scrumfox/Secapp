@@ -105,8 +105,8 @@ document.getElementById("mpinOTPNumber").innerHTML = escape(authData._mpinOTP);
 				
 Veracode Fix/Mitigate Encapsulation Flaws
 
-	- return Newtonsoft.Json.JsonConvert.DeserializeObject<IdentityWorkflowState>(state);
-	+ return JsonConvert.DeserializeObject<IdentityWorkflowState>(state, new JsonSerializerSettings
+	- return Newtonsoft.Json.JsonConvert.DeserializeObject<WorkflowState>(state);
+	+ return JsonConvert.DeserializeObject<WorkflowState>(state, new JsonSerializerSettings
 	  {
 		TypeNameHandling = TypeNameHandling.None
 	  });
@@ -133,9 +133,9 @@ Veracode Fix/Mitigate Information Leakage Flaws:
             +    }
             +}
 			
-  - using (var internalResponse = await HttpClient.GetAsync(this.configSettings.GetSetting("MPin", "RPSInternalUrl")  "/signature/" + id + "/?regOTT=" + regOTT))
+  - using (var internalResponse = await HttpClient.GetAsync(this.configSettings.GetSetting("", "")  "/signature/" + id + "/?regOTT=" + regOTT))
 
-  + using (var internalResponse = await HttpClient.GetAsync(this.configSettings.GetSetting("MPin", "RPSInternalUrl")  "/signature/" + Uri.EscapeUriString(id) + "/?regOTT=" + Uri.EscapeUriString(regOTT)))
+  + using (var internalResponse = await HttpClient.GetAsync(this.configSettings.GetSetting("", "")  "/signature/" + Uri.EscapeUriString(id) + "/?regOTT=" + Uri.EscapeUriString(regOTT)))
   
   Mitigate CRLF Injection
   
@@ -153,9 +153,9 @@ Veracode Fix/Mitigate Information Leakage Flaws:
 	+ filterContext.HttpContext.Response.SetCookie(new HttpCookie("theme") { Value = StringExt.RemoveCrlfsFromString(theme) });
 	
 	Veracode Fix/Mitigate Information Leakage Flaws (Helpdesk)
-	- using (var httpResponse = await httpClient.GetAsync(@"/api/user/GetChangeAccountStatusReasons?newStatus=" +- Uri.EscapeDataString(newStatus)))
+	- using (var httpResponse = await httpClient.GetAsync(@"/api/mmm/mmmm?newStatus=" +- Uri.EscapeDataString(newStatus)))
 	
-	+ using (var httpResponse = await httpClient.GetAsync(Uri.EscapeUriString(@"/api/user/GetChangeAccountStatusReasons?newStatus=" + Uri.EscapeDataString(newStatus))))
+	+ using (var httpResponse = await httpClient.GetAsync(Uri.EscapeUriString(@"/api/mmm/mmmm?newStatus=" + Uri.EscapeDataString(newStatus))))
 	
 Improper Restriction of XML External Entity Reference ('XXE') 
 system_xml_dll.System.Xml.XmlDocument.Load() function to parse an XML document. By default, the default XML entity resolver will attempt to resolve and retrieve external references. If attacker-controlled XML can be submitted to one of these functions, then the attacker could gain access to information about an internal network, local filesystem, or other sensitive data. This is known as an XML eXternal Entity (XXE) attack. The first argument to Load() contains tainted data from the variable templateMetadataPath. The tainted data originated from an earlier call to experian_idaas_accountmanagement_web_dll.virtualcontroller.vc_mvcentry.
