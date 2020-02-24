@@ -1,0 +1,56 @@
+CROSS-SITE REQUEST FORGERY (CSRF)
+Status: Open
+Description:
+Cross-Site Request Forgery (CSRF) is an attack that forces an end user to execute unwanted actions on a web application in which they are currently authenticated. CSRF attacks specifically target state-changing requests, not theft of data, since the attacker has no way to see the response to the forged request.
+Impact:
+The impact of a successful cross-site request forgery attack is limited to the capabilities exposed by the vulnerable application. For example, this attack could result in a transfer of funds, changing a password, or purchasing an item. In effect, CSRF attacks are used by an attacker to make a target system perform a function (funds Transfer, form submission etc.) via the target's browser without knowledge of the target user, at least until the unauthorized function has been committed.
+
+Instances:
+1. https://idp.perf..uk..com/Protect/ProtectAccount/MemorableWord
+Steps To Reproduce:
+1. Open the URL https://idp.perf..uk..com/Register in Firefox.
+2. Enter the username (e.g. peter@parker.com) and other details to sign up for GOV.UK Verify as shown in Fig. 1
+3. Click on “Continue” button to get redirected to https://idp.perf..uk..com/Protect/ProtectAccount/MemorableWord, to set the “Memorable word” and “Memorable word reminder”.
+4. Set the “Memorable word” as “Tuesday” and “Memorable word reminder” as “Tue” as shown in Fig. 2.
+5. Click on “Continue” and intercept the request in Burpsuite as shown in Fig. 3
+6. Right click on the request; select “Engagement Tools” followed by “Generate CSRF PoC” as shown in Fig. 3
+7. In the “CSRF PoC generator”, click on “Copy HTML” as shown in Fig. 4
+8. Open a notepad and paste the HTML Code in it. Modify the “Memorable word” as “Wednesday” and “Memorable word reminder” as “Wed” and save it as HTML document as shown in Fig. 5
+IaS (Web) Penetration Testing Essentials Report
+Page 11 of 19
+9. Open the modified HTML file in another tab in Firefox where the user peter@parker.com is still logged in and on clicking the “Submit” button, one can see that the “Memorable word reminder” i.e. Hint has been changed to “Wed” respectively as shown in Fig. 6
+10. To confirm if the memorable word has changed and if the victim user is actually the one you had logged in with, enter the characters with respect to the new modified “Memorable word” and click on “Continue”.
+11. On clicking the “Continue” button, we can see that we are able to proceed to the next page and the user logged in is still peter@parker.com as shown in Fig. 7
+
+
+PROTECTION MECHANISM FAILURE (MISSING CONTENT-SECURITY-POLICY HEADER)
+Status: Open
+Description:
+The application server sets the Content-Security-Policy (CSP) header in HTTP responses with some unsafe attributes. Therefore, the application is at a risk of having cross-site scripting or other modern application vulnerabilities. When implemented correctly, the CSP header sets a policy that instructs the browser to only fetch resources, such as scripts, images, or objects, from the specified locations. A compliant browser will deny loading any resources from locations not listed in the poliy.
+Impact:
+When implemented correctly, the CSP reduces an attacker's ability to inject malicious content and helps protect a web page from attacks like cross-site scripting (XSS), dynamic code execution, clickjacking, remote file inclusion (RFI), and others. The CSP adds an additional line of defense and reduces the overall security risk.
+
+Steps To Reproduce:
+1. Access the url- https://...uk..com/Account/Login/Username and login using a registered credential.
+2. Intercept the login request using Burpsuite and send it to the “Repeater” tab.
+3. Click on “Go” for forwarding the request and one can see that the Content-Security-Policy header is missing in response as shown in Fig 8.
+Remediation:
+Enable CSP on your website by sending the Content-Security-Policy in HTTP response headers that instruct the browser to apply the policies you specified.
+In Configuration add the below code and restart server:
+Content-Security-Policy "default-src 'none';
+PROTECTION MECHANISM FAILURE (MISSING X-CONTENT-TYPE-OPTIONS HEADER)
+Status: Open
+Description:
+The X-Content Type Options header (with “no sniff value”) prevents IE and chrome from ignoring the content type of a response. This action may prevent untrusted content from being executed on the browser.
+Impact:
+It is found that ‘X-Content-Type-Options’ header is missing from all response of the web application. This is a security feature that helps prevent attacks based on MIME-type confusion. The script and style sheet elements will reject responses with incorrect MIME types if the server sends the response header "X-Content-Type-Options: nosniff".
+Instances:
+1. https://idp.perf..uk..com
+Steps To Reproduce:
+1. Access the url- https://.com/Account/Login/Username and login using a registered credential.
+2. Intercept the login request using Burpsuite and send it to the “Repeater” tab.
+3. Click on “Go” for forwarding the request and one can see that the X-Content-Type-Options Header is missing in response as shown in Fig 9.
+
+Remediation:
+ Server must be configured to set the “X-Content-Type-Options” header with value “nosniff” on all outgoing requests.
+ Sample Example: “X-Content-Type-Options: nosniff”
